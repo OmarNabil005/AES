@@ -1,6 +1,6 @@
-module SubBytes(input[0:127] state, output reg[0:127] out);
+module SubBytes(input[127:0] state, output reg[127:0] out);
 
-reg[7:0] s_box[0:255]; 
+reg[7:0] s_box[0:255];
 
 initial begin
     s_box[0] = 8'h63;
