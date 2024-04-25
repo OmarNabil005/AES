@@ -1,6 +1,6 @@
 module BCD_to_7seg(input[3:0] in, output reg [6:0] out);
       
-    always
+    always @(in)
     begin
         case (in)
             0 : out = 7'b1000000;
@@ -13,7 +13,7 @@ module BCD_to_7seg(input[3:0] in, output reg [6:0] out);
             7 : out = 7'b1111000;
             8 : out = 7'b0000000;
             9 : out = 7'b0010000;
-            default : out = 7'b1111111; 
+            default : out = 7'b1111111;
         endcase
     end
     
