@@ -7,7 +7,7 @@ assign keyschedule[0:127]=key;
 genvar i;
 
 generate
-    for(i=4;i<44;i=i+1)begin : GenerateBlock //generate word by word from (4) to (43)
+    for(i=4;i<44;i=i+1)begin //generate word by word from (4) to (43)
         if(i%4==0)begin
         assign keyschedule[(i * 32) +: 32]=Rotate(subword(keyschedule[(i - 1)* 32 +: 32]))^ keyschedule[( i - 4) * 32 +: 32] ^Rcon(i/4);
         end
@@ -329,4 +329,24 @@ endfunction
 
 
 
+endmodule
+
+
+
+module KeyExpansion128_tbgemy();
+	reg [0:127] keyin;
+	wire [0:1407] keys;
+
+	KeyExpansion uut(keyin,keys);
+
+	integer i;
+
+	initial begin
+		keyin = 128'h2b7e151628aed2a6abf7158809cf4f3c;
+		#10;
+
+		for (i = 0; i < 44; i = i + 1) begin
+			$display("keys[%0d] = %h", i, keys[(i * 32) +: 32]);
+		end
+	end
 endmodule

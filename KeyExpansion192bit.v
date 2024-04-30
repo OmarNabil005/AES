@@ -1,4 +1,4 @@
-module KeyExpansion (input [0:191] key, output [0:1663] keyschedule );
+module KeyExpansion192 (input [0:191] key, output [0:1663] keyschedule );
 
 
 assign keyschedule[0:191]=key;

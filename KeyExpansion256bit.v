@@ -1,4 +1,4 @@
-module KeyExpansion (input [0:255] key, output [0:1919] keyschedule );
+module KeyExpansion256 (input [0:255] key, output [0:1919] keyschedule );
 
 
 assign keyschedule[0:255]=key;
