@@ -7,7 +7,7 @@ assign keyschedule[0:191]=key;
 genvar i;
 
 generate
-    for(i=6;i<52;i=i+1)begin : GenerateBlock //generate word by word from (4) to (43)
+    for(i=6;i<52;i=i+1)begin : GenerateBlockM //generate word by word from (4) to (43)
         if(i%6==0)begin
         assign keyschedule[(i * 32) +: 32]=Rotate(subword(keyschedule[(i - 1)* 32 +: 32]))^ keyschedule[( i - 6) * 32 +: 32] ^Rcon(i/6);
         end

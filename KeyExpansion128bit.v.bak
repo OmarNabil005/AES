@@ -9,7 +9,7 @@ module KeyExpansion128 (input [0:127] key, output [0:1407] keyschedule );
 
  genvar i;
     generate
-    for (i=4;i<44;i=i+1)begin: GenerateBlockS
+    for(i=4;i<44;i=i+1)begin
         if(i%4==0)begin
        assign keyschedule[(i * 32) +: 32]=  keyschedule[((i - 4) * 32) +: 32]  ^subword(rotword(keyschedule[((i - 1) * 32) +: 32]))^rconx(i/4);
         end

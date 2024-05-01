@@ -5,7 +5,7 @@ output [127:0] state_out;
 function[7:0] mult(input [7:0]in,input integer z);
 integer i;
 begin
-	for(i=0;i<z;i=i+1)begin: ShiftXor
+	for(i=0;i<z;i=i+1)begin
 		if(in[7] == 1) in = ((in << 1) ^ 8'h1b);
 		else in = in<< 1; 
 	end
