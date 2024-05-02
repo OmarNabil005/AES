@@ -23,8 +23,6 @@ endgenerate
 
 
 
-
-
 function[0:31] rconx;
 input [0:31] r; 
 begin
@@ -43,10 +41,6 @@ begin
   endcase
   end
 endfunction
-
-
-
-
 
 
 function[31:0] subword(input [31:0] in);
@@ -321,9 +315,6 @@ begin
 	endcase
 end
 endfunction
-
-
-
 
 
 function [0:31] rotword;
