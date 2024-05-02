@@ -1,52 +1,51 @@
-module KeyExpansion256 (input [0:255] key, output [0:1919] keyschedule );
+module KeyExpansion #(parameter nk=6, parameter nr=12)(key, keyschedule);
 
 
-assign keyschedule[0:255]=key;
+input [0:((32 * nk) - 1)] key;
+output [0:(128 * (nr + 1)) - 1] keyschedule;
+
+ assign keyschedule[0:(nk * 32) - 1]=key;
 
 
-genvar i;
+//reg [31:0] temp2;
 
-generate
-    for (i=8;i<60;i=i+1)begin : GenerateBlockL //generate word by word from (4) to (43)
-        if(i%8==0)begin
-        assign keyschedule[(i * 32) +: 32]=Rotate(subword(keyschedule[(i - 1)* 32 +: 32]))^ keyschedule[( i - 8) * 32 +: 32] ^Rcon(i/8);
+ genvar i;
+    generate
+    for (i=nk;i< 4 * (nr + 1);i=i+1)begin: GenerateBlockS
+        if(i%nk==0)begin
+       assign keyschedule[(i * 32) +: 32]=  keyschedule[((i - nk) * 32) +: 32]  ^subword(rotword(keyschedule[((i - 1) * 32) +: 32]))^rconx(i/nk);
         end
-        else if ( i % 8 == 4)begin
+		else if (nk > 6 && i % 8 == 4)begin
         assign keyschedule[(i * 32) +: 32]=subword(keyschedule[(i - 1)* 32 +: 32])^ keyschedule[( i - 8) * 32 +: 32];
         end
         else begin
-        assign keyschedule[(i * 32) +: 32]= keyschedule[( i - 8) * 32 +: 32] ^ keyschedule[(i - 1)* 32 +: 32];
+        assign keyschedule[((i)*32) +: 32]=  keyschedule[((i - 1) * 32) +: 32] ^ keyschedule[ ((i-nk)*32) +: 32];
         end
     end
+
 endgenerate
 
 
 
 
-
-
-function[0:31] Rcon;
+function[0:31] rconx;
 input [0:31] r; 
 begin
  case(r)
-    4'h1: Rcon=32'h01000000;
-    4'h2: Rcon=32'h02000000;
-    4'h3: Rcon=32'h04000000;
-    4'h4: Rcon=32'h08000000;
-    4'h5: Rcon=32'h10000000;
-    4'h6: Rcon=32'h20000000;
-    4'h7: Rcon=32'h40000000;
-    4'h8: Rcon=32'h80000000;
-    4'h9: Rcon=32'h1b000000;
-    4'ha: Rcon=32'h36000000;
-    default: Rcon=32'h00000000;
+    4'h1: rconx=32'h01000000;
+    4'h2: rconx=32'h02000000;
+    4'h3: rconx=32'h04000000;
+    4'h4: rconx=32'h08000000;
+    4'h5: rconx=32'h10000000;
+    4'h6: rconx=32'h20000000;
+    4'h7: rconx=32'h40000000;
+    4'h8: rconx=32'h80000000;
+    4'h9: rconx=32'h1b000000;
+    4'ha: rconx=32'h36000000;
+    default: rconx=32'h00000000;
   endcase
   end
 endfunction
-
-
-
-
 
 
 function[31:0] subword(input [31:0] in);
@@ -323,13 +322,29 @@ end
 endfunction
 
 
-
-
-
-function [31:0] Rotate(input[0:31] in);
-    Rotate = {in[8:31], in[0:7]};
+function [0:31] rotword;
+	input [0:31] x;
+	begin
+		rotword = {x[8:31], x[0:7]};
+	end
 endfunction
 
+endmodule
 
+module KeyExpansion128_tbgemy();
+	reg [0:127] keyin;
+	wire [0:(128*11) - 1] keys;
 
+	KeyExpansion #(4,10) uut(keyin,keys);
+
+	integer i;
+
+	initial begin
+		keyin = 128'h2b7e151628aed2a6abf7158809cf4f3c;
+		#10;
+
+		for (i = 0; i < 44; i = i + 1) begin
+			$display("keys[%0d] = %h", i, keys[(i * 32) +: 32]);
+		end
+	end
 endmodule
