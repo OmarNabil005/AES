@@ -20,7 +20,7 @@ BCD_to_7seg one({w5[2:0], in[0]}, o1);
 BCD_to_7seg ten({w7[2:0], w5[3]}, o2);
 BCD_to_7seg hundred({2'b00, w6[3], w7[3]}, o3);
 
-always @(in) begin
+always @(*) begin
     ones = o1;
     tens = o2;
     hundreds = o3;

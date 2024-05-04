@@ -35,30 +35,30 @@ always @(posedge clk)
 begin
     if(i<1)begin
     i <= i + 1;
-    stateReg=out0;
+    stateReg<=out0;
     end
     else if(i<nr)begin
     i <= i + 1;
-    stateReg=out4;
+    stateReg<=out4;
     end
     else if (i == nr)begin
     i <= i + 1;
-    stateReg=out3Final;
+    stateReg<=out3Final;
     end
     
 
     // Inv Cipher !!!
     else if(i==(nr + 1))begin
         i <= i + 1;
-        stateReg=try;
+        stateReg<=try;
     end
     else if(i<=(2 * nr))begin
     i <= i + 1;
-    stateReg=out8;
+    stateReg<=out8;
     end
     else if (i == (2 * nr + 1))begin
     i <= i + 1;
-    stateReg=out6Final;
+    stateReg<=out6Final;
     end
 end
 //assign cipher=stateReg;
