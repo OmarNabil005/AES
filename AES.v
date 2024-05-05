@@ -1,87 +1,57 @@
-module AES #(parameter nk=4, parameter nr=10)(Message, Key, clk, HEX2, HEX1, HEX0);
-
-input clk;
-input [0:127] Message;
-input [0:(32 * nk) - 1] Key;
-output [6:0] HEX2;
-output [6:0] HEX1;
-output [6:0] HEX0;
+module AES #(parameter nk=4, parameter nr=10)(input clk, input [0:127] Message,
+                                              input [0:(32 * nk) - 1] Key, output [6:0] HEX2,
+                                              output [6:0] HEX1, output [6:0] HEX0);
 
 reg [0:127] stateReg;
 wire [0: 128 * (nr + 1) -1] KeySchedule;
-
-initial begin
-    stateReg = 0;
-end
 reg [0:4] i = 5'b00000;
-wire [0:127] out0, out1, out2, out3, out4,
-             out5,out6, out7, out8, out1Final,
-             out2Final, out3Final, out4Final,
-             out5Final, out6Final, try;
+wire [0:127] firstEncrypt, afterEncrypt, lastEncrypt, firstDecrypt, afterDecrypt, lastDecrypt;
 
-KeyExpansion #(nk, nr) keyExp(Key, KeySchedule);
+initial
+    stateReg = 0;
 
-AddRoundKey initialRound(Message,KeySchedule[0:127],out0);
+binaryToSevenSegment hexa(stateReg[120 +: 8], HEX2, HEX1, HEX0);
 
-Binary_to_7seg hexa(stateReg[120 +: 8], HEX2, HEX1, HEX0);
+keyExpansion #(nk, nr) keyExp(Key, KeySchedule);
 
-
-SubBytes subbytes(stateReg,out1);
-ShiftRows shiftrows(out1,out2);
-mixcolumns mixcol(out2,out3);
-AddRoundKey addround(out3,KeySchedule[128*i +: 128],out4);
+addRoundKey initialRound(Message, KeySchedule[0:127], firstEncrypt);
+encryptRound er(stateReg, KeySchedule[128*i +: 128], afterEncrypt);
+encryptLastRound elr(stateReg, KeySchedule[(128 * nr) +: 128], lastEncrypt);
 
 always @(posedge clk) 
 begin
     if(i<1)begin
     i <= i + 1;
-    stateReg<=out0;
+    stateReg<=firstEncrypt;
     end
     else if(i<nr)begin
     i <= i + 1;
-    stateReg<=out4;
+    stateReg<=afterEncrypt;
     end
     else if (i == nr)begin
     i <= i + 1;
-    stateReg<=out3Final;
+    stateReg<=lastEncrypt;
     end
     
-
     // Inv Cipher !!!
     else if(i==(nr + 1))begin
         i <= i + 1;
-        stateReg<=try;
+        stateReg<=firstDecrypt;
     end
     else if(i<=(2 * nr))begin
     i <= i + 1;
-    stateReg<=out8;
+    stateReg<=afterDecrypt;
     end
     else if (i == (2 * nr + 1))begin
     i <= i + 1;
-    stateReg<=out6Final;
+    stateReg<=lastDecrypt;
     end
 end
-//assign cipher=stateReg;
-
-SubBytes subbytess(stateReg,out1Final);
-ShiftRows shift(out1Final,out2Final);
-AddRoundKey lastround(out2Final,KeySchedule[(128 * nr) +: 128], out3Final);
 
 // Inverse cipher !!!
-
-AddRoundKey inv_initialll (stateReg,KeySchedule[(128 * nr) +:128],try);
-
-
-inv_SubBytes inv_subbytes(stateReg,out5);
-invShiftRows inv_shiftrows(out5,out6);
-AddRoundKey inv_addround(out6,KeySchedule[(128 * (2 * nr - i + 1)) +:128],out7);
-inverseMixColumns inv_mixcol(out7,out8);
-
-inv_SubBytes inv1_subbytess(stateReg,out4Final);
-invShiftRows inv1_shift(out4Final,out5Final);
-AddRoundKey inv1_lastround(out5Final,KeySchedule[0:127],out6Final);
-
-
+addRoundKey inv_initialll (stateReg,KeySchedule[(128 * nr) +:128], firstDecrypt);
+decryptRound decR(stateReg, KeySchedule[(128 * (2 * nr - i + 1)) +:128], afterDecrypt);
+decryptLastRound decLR(stateReg, KeySchedule[0:127], lastDecrypt);
 
 endmodule
 
@@ -103,9 +73,9 @@ reg clk;
 
 // Instantiate the module under test
 AES #(8, 14) encrypt_inst (
+    .clk(clk),
     .Message(message),
     .Key(key),
-    .clk(clk),
     .HEX2(HEx2),
     .HEX1(HEx1),
     .HEX0(HEx0)

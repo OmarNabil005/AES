@@ -1,14 +1,9 @@
-module KeyExpansion #(parameter nk=4, parameter nr=10)(key, keyschedule);
+module keyExpansion #(parameter nk=4, parameter nr=10)(input [0 : 32 * nk - 1] key, output [0 : 128 * (nr + 1) - 1] keyschedule);
 
+assign keyschedule[0 : (nk * 32) - 1] = key;
 
-input [0:((32 * nk) - 1)] key;
-output [0:(128 * (nr + 1)) - 1] keyschedule;
-
-assign keyschedule[0:(nk * 32) - 1] = key;
-
-
-wire [0:(32 * ((4 * nr) / nk)) - 1] sWord;
-wire [0:191] sWord256;
+wire [0 : (128 * nr / nk) - 1] sWord;
+wire [0 : 191] sWord256;
 
  genvar i;
     generate
@@ -21,8 +16,8 @@ wire [0:191] sWord256;
         assign keyschedule[(i * 32) +: 32]=  keyschedule[((i - nk) * 32) +: 32]  ^ sWord[(((i / nk) - 1) * 32) +: 32] ^ rconx(i/nk);
         end
 		else if (nk > 6 && i % 8 == 4)begin
-    	subword sw256(keyschedule[(i - 1)* 32 +: 32], sWord256[(((i - 12) / 8) * 32) +: 32]);
-        assign keyschedule[(i * 32) +: 32]= sWord256[(((i - 12) / 8) * 32) +: 32] ^ keyschedule[( i - 8) * 32 +: 32];
+    	subword sw256(keyschedule[(i - 1)* 32 +: 32], sWord256[((i - 12) * 4) +: 32]);
+        assign keyschedule[(i * 32) +: 32]= sWord256[((i - 12) * 4) +: 32] ^ keyschedule[(( i - 8) * 32) +: 32];
         end        
         else 
         assign keyschedule[((i)*32) +: 32]=  keyschedule[((i - 1) * 32) +: 32] ^ keyschedule[ ((i-nk)*32) +: 32];

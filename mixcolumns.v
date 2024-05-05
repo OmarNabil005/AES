@@ -1,7 +1,4 @@
-module mixcolumns (input[127:0] state,
-output[127:0]nstate
-
-);
+module mixColumns (input[127:0] state, output[127:0] nstate);
 
 function [7:0]mb_2;
 input [7:0]in;

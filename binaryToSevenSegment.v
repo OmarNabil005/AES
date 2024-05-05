@@ -1,4 +1,4 @@
-module Binary_to_7seg(input[7:0] in, output[6:0] hundreds, output[6:0] tens, output[6:0] ones);
+module binaryToSevenSegment(input[7:0] in, output[6:0] hundreds, output[6:0] tens, output[6:0] ones);
 
 wire [3:0] w1,w2, w3, w4, w5, w6, w7;
 wire [6:0] o1, o2, o3;

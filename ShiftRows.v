@@ -1,4 +1,4 @@
-module ShiftRows(input [127:0] state, output[127:0] nstate);
+module shiftRows(input [127:0] state, output[127:0] nstate);
     assign nstate[127:120] = state[127:120];         // [0] = [0]
     assign nstate[119:112] = state[87:80];           // [1] = [5]
     assign nstate[111:104] = state[47:40];           // [2] = [10]

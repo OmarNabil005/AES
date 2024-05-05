@@ -1,8 +1,7 @@
-module inverseMixColumns(state_in,state_out);
-input [127:0] state_in;
-output [127:0] state_out;
+module invMixColumns(input [127:0] state, output [127:0] nstate);
 
-function[7:0] mult(input [7:0]in,input integer z);
+
+function[7:0] mult(input [7:0]in, input integer z);
 integer i;
 begin
 	for(i=0;i<z;i=i+1)begin: ShiftXor
@@ -48,10 +47,10 @@ endfunction
 genvar i;
 generate 
 for(i=0;i< 4;i=i+1) begin : m_col
-	assign state_out[(i*32 + 24)+:8]= mb_e(state_in[(i*32 + 24)+:8]) ^ mb_b(state_in[(i*32 + 16)+:8]) ^ mb_d(state_in[(i*32 + 8)+:8]) ^ mb_9(state_in[i*32+:8]);
-	assign state_out[(i*32 + 16)+:8]= mb_9(state_in[(i*32 + 24)+:8]) ^ mb_e(state_in[(i*32 + 16)+:8]) ^ mb_b(state_in[(i*32 + 8)+:8]) ^ mb_d(state_in[i*32+:8]);
-	assign state_out[(i*32 + 8)+:8]= mb_d(state_in[(i*32 + 24)+:8]) ^ mb_9(state_in[(i*32 + 16)+:8]) ^ mb_e(state_in[(i*32 + 8)+:8]) ^ mb_b(state_in[i*32+:8]);
-   assign state_out[i*32+:8]= mb_b(state_in[(i*32 + 24)+:8]) ^ mb_d(state_in[(i*32 + 16)+:8]) ^ mb_9(state_in[(i*32 + 8)+:8]) ^ mb_e(state_in[i*32+:8]);
+	assign nstate[(i*32 + 24)+:8]= mb_e(state[(i*32 + 24)+:8]) ^ mb_b(state[(i*32 + 16)+:8]) ^ mb_d(state[(i*32 + 8)+:8]) ^ mb_9(state[i*32+:8]);
+	assign nstate[(i*32 + 16)+:8]= mb_9(state[(i*32 + 24)+:8]) ^ mb_e(state[(i*32 + 16)+:8]) ^ mb_b(state[(i*32 + 8)+:8]) ^ mb_d(state[i*32+:8]);
+	assign nstate[(i*32 + 8)+:8]= mb_d(state[(i*32 + 24)+:8]) ^ mb_9(state[(i*32 + 16)+:8]) ^ mb_e(state[(i*32 + 8)+:8]) ^ mb_b(state[i*32+:8]);
+   assign nstate[i*32+:8]= mb_b(state[(i*32 + 24)+:8]) ^ mb_d(state[(i*32 + 16)+:8]) ^ mb_9(state[(i*32 + 8)+:8]) ^ mb_e(state[i*32+:8]);
 end
 endgenerate
 endmodule
