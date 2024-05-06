@@ -1,7 +1,6 @@
 module binaryToSevenSegment(input[7:0] in, output[6:0] hundreds, output[6:0] tens, output[6:0] ones);
 
 wire [3:0] w1,w2, w3, w4, w5, w6, w7;
-wire [6:0] o1, o2, o3;
 
 shift_add_3 sh1({1'b0, in[7:5]}, w1);
 shift_add_3 sh2({w1[2:0], in[4]}, w2);
@@ -11,13 +10,9 @@ shift_add_3 sh5({w4[2:0], in[1]}, w5);
 shift_add_3 sh6({1'b0, w1[3], w2[3], w3[3]}, w6);
 shift_add_3 sh7({w6[2:0], w4[3]}, w7);
 
-BCD_to_7seg one({w5[2:0], in[0]}, o1);
-BCD_to_7seg ten({w7[2:0], w5[3]}, o2);
-BCD_to_7seg hundred({2'b00, w6[3], w7[3]}, o3);
-
-    assign ones = o1;
-    assign tens = o2;
-    assign hundreds = o3;
+BCD_to_7seg one({w5[2:0], in[0]}, ones);
+BCD_to_7seg ten({w7[2:0], w5[3]}, tens);
+BCD_to_7seg hundred({2'b00, w6[3], w7[3]}, hundreds);
 
 endmodule
 

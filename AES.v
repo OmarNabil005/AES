@@ -2,56 +2,13 @@ module AES #(parameter nk=4, parameter nr=10)(input clk, input [0:127] Message,
                                               input [0:(32 * nk) - 1] Key, output [6:0] HEX2,
                                               output [6:0] HEX1, output [6:0] HEX0);
 
-reg [0:127] stateReg;
 wire [0: 128 * (nr + 1) -1] KeySchedule;
-reg [0:4] i = 5'b00000;
-wire [0:127] firstEncrypt, afterEncrypt, lastEncrypt, firstDecrypt, afterDecrypt, lastDecrypt;
-
-initial
-    stateReg = 0;
-
-binaryToSevenSegment hexa(stateReg[120 +: 8], HEX2, HEX1, HEX0);
+wire [0:127] afterEncrypt, outwire;
 
 keyExpansion #(nk, nr) keyExp(Key, KeySchedule);
-
-addRoundKey initialRound(Message, KeySchedule[0:127], firstEncrypt);
-encryptRound er(stateReg, KeySchedule[128*i +: 128], afterEncrypt);
-encryptLastRound elr(stateReg, KeySchedule[(128 * nr) +: 128], lastEncrypt);
-
-always @(posedge clk) 
-begin
-    if(i<1)begin
-    i <= i + 1;
-    stateReg<=firstEncrypt;
-    end
-    else if(i<nr)begin
-    i <= i + 1;
-    stateReg<=afterEncrypt;
-    end
-    else if (i == nr)begin
-    i <= i + 1;
-    stateReg<=lastEncrypt;
-    end
-    
-    // Inv Cipher !!!
-    else if(i==(nr + 1))begin
-        i <= i + 1;
-        stateReg<=firstDecrypt;
-    end
-    else if(i<=(2 * nr))begin
-    i <= i + 1;
-    stateReg<=afterDecrypt;
-    end
-    else if (i == (2 * nr + 1))begin
-    i <= i + 1;
-    stateReg<=lastDecrypt;
-    end
-end
-
-// Inverse cipher !!!
-addRoundKey inv_initialll (stateReg,KeySchedule[(128 * nr) +:128], firstDecrypt);
-decryptRound decR(stateReg, KeySchedule[(128 * (2 * nr - i + 1)) +:128], afterDecrypt);
-decryptLastRound decLR(stateReg, KeySchedule[0:127], lastDecrypt);
+encrypt #(nk, nr) enc(clk, Message, KeySchedule, afterEncrypt);
+decrypt #(nk, nr) dec(clk, afterEncrypt, KeySchedule, outwire);
+binaryToSevenSegment hexa(outwire[120 +: 8], HEX2, HEX1, HEX0);
 
 endmodule
 

@@ -1,4 +1,4 @@
-module inv_sBox(input[7:0] in, output[7:0] out);
+module invSBox(input[7:0] in, output[7:0] out);
 
     reg[7:0] inv_s_box[0:255];
     initial begin
