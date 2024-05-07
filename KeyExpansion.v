@@ -47,22 +47,22 @@ begin
 endfunction
 
 
-module subword(input [31:0] in, output [31:0] out);
-begin
-	sBox sbo1(in[7 -: 8], out[7 -: 8]);
-	sBox sbo2(in[15 -: 8], out[15 -: 8]);
-	sBox sbo3(in[23 -: 8], out[23 -: 8]);
-	sBox sbo4(in[31 -: 8], out[31 -: 8]);
-end
-endmodule
-
-
 function [0:31] rotword;
 	input [0:31] x;
 		rotword = {x[8:31], x[0:7]};
 endfunction
 
 endmodule
+
+module subword(input [31:0] in, output [31:0] out);
+
+	sBox sbo1(in[7 -: 8], out[7 -: 8]);
+	sBox sbo2(in[15 -: 8], out[15 -: 8]);
+	sBox sbo3(in[23 -: 8], out[23 -: 8]);
+	sBox sbo4(in[31 -: 8], out[31 -: 8]);
+
+endmodule
+
 
 module KeyExpansion128_tbgemy();
 	reg [0:255] keyin;

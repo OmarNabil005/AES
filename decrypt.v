@@ -9,24 +9,24 @@ initial
 assign decipher=stateReg;
 
 addRoundKey inv_initial (Message,keySchedule[(128 * nr) +:128], firstDecrypt);
-decryptRound decR(stateReg, keySchedule[(128 * (2 * nr - i + 2)) +:128], afterDecrypt);
+decryptRound decR(stateReg, keySchedule[(128 * (2 * nr - i + 1)) +:128], afterDecrypt);
 decryptLastRound decLR(stateReg, keySchedule[0:127], lastDecrypt);
 
-always @(negedge clk) 
+always @(posedge clk) 
 begin
-    if(i <= nr + 1)begin
+    if(i <= nr)begin
     i <= i + 1;
     stateReg<=Message;
     end
-    else if(i==(nr + 2))begin
+    else if(i==(nr + 1))begin
     i <= i + 1;
     stateReg<=firstDecrypt;
     end
-    else if(i<=(2 * nr + 1))begin
+    else if(i<=(2 * nr))begin
     i <= i + 1;
     stateReg<=afterDecrypt;
     end
-    else if (i == (2 * nr + 2))begin
+    else if (i == (2 * nr + 1))begin
     i <= i + 1;
     stateReg<=lastDecrypt;
     end
