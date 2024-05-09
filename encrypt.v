@@ -9,23 +9,23 @@ initial
 assign cipher = stateReg;
 
 reg prev = 0;
-reg current = 0;
+reg res = 0;
+
+always @(reset)
+    res = ~res;
 
 addRoundKey initialRound(Message, keySchedule[0:127], firstEncrypt);
 encryptRound er(stateReg, keySchedule[128*i +: 128], afterEncrypt);
 encryptLastRound elr(stateReg, keySchedule[(128 * nr) +: 128], lastEncrypt);
 
-always @(reset)
-    current = ~current;
-
 always @(posedge clk) 
 begin
-    if (prev != current)
+    if (prev != res)
     begin
-        i <= 0;
-		  prev <= current;
+    i <= 0;
+	prev <= res;
     end
-    if(i<1)begin
+    else if(i<1)begin
     i <= i + 1;
     stateReg<=firstEncrypt;
     end

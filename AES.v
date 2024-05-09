@@ -1,4 +1,4 @@
-module AES (input clk, input [1:0] SW, output [6:0] HEX2, output [6:0] HEX1, output [6:0] HEX0);
+module AES (input clk, input reset, input [1:0] SW, output [6:0] HEX2, output [6:0] HEX1, output [6:0] HEX0);
 
 wire [127:0] Message =128'h00112233445566778899aabbccddeeff; // Fixed message
 wire [0:127] Key128 = 128'h2b7e151628aed2a6abf7158809cf4f3c;
@@ -15,10 +15,9 @@ wire [0:127] afterEncrypt128, afterDecrypt128,
 reg [0:127] outReg = 128'h0;
 integer nk = 4;
 integer nr = 10;
-reg reset = 0;
+reg res = 0;
 reg [0:4] i = 5'b00000;
-reg PrevSW1;
-reg PrevSW0;
+reg prev = 0;
 
 keyExpansion #(4, 10) keyExp128(Key128, KeySchedule128);
 keyExpansion #(6, 12) keyExp192(Key192, KeySchedule192);
@@ -33,19 +32,19 @@ decrypt #(8, 14) dec256(clk, reset, afterEncrypt256, KeySchedule256, afterDecryp
 
 binaryToSevenSegment BCDconvert(outReg, HEX2, HEX1, HEX0);
 
-always @(SW[1] or SW[0])begin
-    reset = ~reset;
-    if (!SW[1] && SW[0])
+always @(reset)begin
+    res = ~res;
+    if (SW == 2'b01)
     begin
        nk = 4;
        nr = 10; 
     end
-    else if (SW[1] && !SW[0])
+    else if (SW == 2'b10)
     begin
        nk = 6;
        nr = 12; 
     end
-    else if (SW[1] && SW[0])
+    else if (SW == 2'b11)
     begin
        nk = 8;
        nr = 14; 
@@ -54,44 +53,41 @@ end
 
 always @(posedge clk)
 begin
-    if (PrevSW1 != SW[1])begin
+    if (prev != res)begin
     i <= 0;
     outReg <= 0;
-    PrevSW1 = SW[1];
+    prev <= res;
     end
-    if (PrevSW0 != SW[0])begin
-    i <= 0;
+    else if (SW == 2'b00)
+    begin
     outReg <= 0;
-    PrevSW0 = SW[0];
-    end
-    if (!SW[1] && !SW[0])begin
-        outReg <= 0;
+    i <= 0;
     end
     else if (i < 1)begin
         outReg <= Message;
         i <= i + 1;
     end
-    else if (i <= (nr + 1) && !SW[1] && SW[0])begin
+    else if (i <= (nr + 1) && SW == 2'b01)begin
         outReg <= afterEncrypt128;
         i <= i + 1;
     end
-    else if (i <= (2 * nr + 2) && !SW[1] && SW[0])begin
+    else if (i <= (2 * nr + 2) && SW == 2'b01)begin
         outReg <= afterDecrypt128;
         i <= i + 1;
     end
-    else if (i <= (nr + 1) && SW[1] && !SW[0])begin
+    else if (i <= (nr + 1) && SW == 2'b10)begin
         outReg <= afterEncrypt192;
         i <= i + 1;
     end
-    else if (i <= (2 * nr + 2) && SW[1] && !SW[0])begin
+    else if (i <= (2 * nr + 2) && SW == 2'b10)begin
         outReg <= afterDecrypt192;
         i <= i + 1;
     end
-    else if (i <= (nr + 1) && SW[1] && SW[0])begin
+    else if (i <= (nr + 1) && SW == 2'b11)begin
         outReg <= afterEncrypt256;
         i <= i + 1;
     end
-    else if (i <= (2 * nr + 2) && SW[1] && SW[0])begin
+    else if (i <= (2 * nr + 2) && SW == 2'b11)begin
         outReg <= afterDecrypt256;
         i <= i + 1;
     end
