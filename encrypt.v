@@ -1,4 +1,4 @@
-module encrypt#(parameter nk=4, parameter nr=10)(input clk, input [0:127] Message, input [0: 128 * (nr + 1) -1] keySchedule, output [0:127] cipher);
+module encrypt#(parameter nk=4, parameter nr=10)(input clk, input reset, input [0:127] Message, input [0: 128 * (nr + 1) -1] keySchedule, output [0:127] cipher);
 
 reg [0:3] i = 4'b0000;
 reg [0:127] stateReg;
@@ -8,12 +8,23 @@ initial
     stateReg = 0;
 assign cipher = stateReg;
 
+reg prev = 0;
+reg current = 0;
+
 addRoundKey initialRound(Message, keySchedule[0:127], firstEncrypt);
 encryptRound er(stateReg, keySchedule[128*i +: 128], afterEncrypt);
 encryptLastRound elr(stateReg, keySchedule[(128 * nr) +: 128], lastEncrypt);
 
+always @(reset)
+    current = ~current;
+
 always @(posedge clk) 
 begin
+    if (prev != current)
+    begin
+        i <= 0;
+		  prev <= current;
+    end
     if(i<1)begin
     i <= i + 1;
     stateReg<=firstEncrypt;

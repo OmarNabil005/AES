@@ -1,31 +1,98 @@
-module AES #(parameter nk=8, parameter nr=14)(input clk, output [6:0] HEX2,
-                                              output [6:0] HEX1, output [6:0] HEX0);
+module AES (input clk, input [1:0] SW, output [6:0] HEX2, output [6:0] HEX1, output [6:0] HEX0);
 
 wire [127:0] Message =128'h00112233445566778899aabbccddeeff; // Fixed message
-wire [0:255] Key = 256'h000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f; // Fixed key
-wire [0: 128 * (nr + 1) -1] KeySchedule;
-wire [0:127] afterEncrypt, outwire;
+wire [0:127] Key128 = 128'h2b7e151628aed2a6abf7158809cf4f3c;
+wire [0:191] Key192 = 192'h8e73b0f7da0e6452c810f32b809079e562f8ead2522c6b7b;
+wire [0:255] Key256 = 256'h000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f; // Fixed key
 
+wire [0:1407] KeySchedule128;
+wire [0:1663] KeySchedule192;
+wire [0:1919] KeySchedule256;
+wire [0:127] afterEncrypt128, afterDecrypt128,
+             afterEncrypt192, afterDecrypt192,
+             afterEncrypt256, afterDecrypt256;
+
+reg [0:127] outReg = 128'h0;
+integer nk = 4;
+integer nr = 10;
+reg reset = 0;
 reg [0:4] i = 5'b00000;
-reg [0:127] outReg;
+reg PrevSW1;
+reg PrevSW0;
 
-keyExpansion #(nk, nr) keyExp(Key, KeySchedule);
-encrypt #(nk, nr) enc(clk, Message, KeySchedule, afterEncrypt);
-decrypt #(nk, nr) dec(clk, afterEncrypt, KeySchedule, outwire);
+keyExpansion #(4, 10) keyExp128(Key128, KeySchedule128);
+keyExpansion #(6, 12) keyExp192(Key192, KeySchedule192);
+keyExpansion #(8, 14) keyExp256(Key256, KeySchedule256);
+
+encrypt #(4, 10) enc128(clk, reset, Message, KeySchedule128, afterEncrypt128);
+decrypt #(4, 10) dec128(clk, reset, afterEncrypt128, KeySchedule128, afterDecrypt128);
+encrypt #(6, 12) enc192(clk, reset, Message, KeySchedule192, afterEncrypt192);
+decrypt #(6, 12) dec192(clk, reset, afterEncrypt192, KeySchedule192, afterDecrypt192);
+encrypt #(8, 14) enc256(clk, reset, Message, KeySchedule256, afterEncrypt256);
+decrypt #(8, 14) dec256(clk, reset, afterEncrypt256, KeySchedule256, afterDecrypt256);
+
 binaryToSevenSegment BCDconvert(outReg, HEX2, HEX1, HEX0);
+
+always @(SW[1] or SW[0])begin
+    reset = ~reset;
+    if (!SW[1] && SW[0])
+    begin
+       nk = 4;
+       nr = 10; 
+    end
+    else if (SW[1] && !SW[0])
+    begin
+       nk = 6;
+       nr = 12; 
+    end
+    else if (SW[1] && SW[0])
+    begin
+       nk = 8;
+       nr = 14; 
+    end
+end
 
 always @(posedge clk)
 begin
-    if (i < 1)begin
+    if (PrevSW1 != SW[1])begin
+    i <= 0;
+    outReg <= 0;
+    PrevSW1 = SW[1];
+    end
+    if (PrevSW0 != SW[0])begin
+    i <= 0;
+    outReg <= 0;
+    PrevSW0 = SW[0];
+    end
+    if (!SW[1] && !SW[0])begin
+        outReg <= 0;
+    end
+    else if (i < 1)begin
         outReg <= Message;
         i <= i + 1;
     end
-    else if (i <= nr + 1)begin
-        outReg <= afterEncrypt;
+    else if (i <= (nr + 1) && !SW[1] && SW[0])begin
+        outReg <= afterEncrypt128;
         i <= i + 1;
     end
-    else if (i <= (2 * nr + 2))begin
-        outReg <= outwire;
+    else if (i <= (2 * nr + 2) && !SW[1] && SW[0])begin
+        outReg <= afterDecrypt128;
+        i <= i + 1;
+    end
+    else if (i <= (nr + 1) && SW[1] && !SW[0])begin
+        outReg <= afterEncrypt192;
+        i <= i + 1;
+    end
+    else if (i <= (2 * nr + 2) && SW[1] && !SW[0])begin
+        outReg <= afterDecrypt192;
+        i <= i + 1;
+    end
+    else if (i <= (nr + 1) && SW[1] && SW[0])begin
+        outReg <= afterEncrypt256;
+        i <= i + 1;
+    end
+    else if (i <= (2 * nr + 2) && SW[1] && SW[0])begin
+        outReg <= afterDecrypt256;
         i <= i + 1;
     end
 end
@@ -40,14 +107,18 @@ wire [6:0] HEx2;
 wire [6:0] HEx1;
 wire [6:0] HEx0;
 reg clk;
+reg SWa = 0;
+reg SWb = 0;
 
 ///
 
 
 
-// Instantiate the module under test
-AES #(8, 14) encrypt_inst (
+//Instantiate the module under test
+AES encrypt_inst (
     .clk(clk),
+    // .SW[1](SWa),
+    // .SW[0](SWb),
     .HEX2(HEx2),
     .HEX1(HEx1),
     .HEX0(HEx0)
@@ -61,8 +132,6 @@ initial begin
     forever #5 clk = ~clk;
 
     // Display output
-
-    $monitor("Key Schedule %h", encrypt_inst.KeySchedule);
 end
 
 endmodule
