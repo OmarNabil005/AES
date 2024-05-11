@@ -8,23 +8,14 @@ initial
     stateReg = 0;
 assign decipher=stateReg;
 
-reg prev = 0;
-reg res = 0;
-
 addRoundKey decInitial(Message,keySchedule[(128 * nr) +:128], firstDecrypt);
 decryptRound decR(stateReg, keySchedule[(128 * (2 * nr - i + 1)) +:128], afterDecrypt);
 decryptLastRound decLR(stateReg, keySchedule[0:127], lastDecrypt);
 
-always @(posedge reset)
-    res = ~res;
-
 always @(posedge clk) 
 begin
-    if (prev != res)
-    begin
-    i <= 0;
-    prev <= res;
-    end
+    if (reset)
+        i <= 0;
     else if(i <= nr)begin
     i <= i + 1;
     stateReg<=Message;

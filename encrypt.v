@@ -8,23 +8,14 @@ initial
     stateReg = 0;
 assign cipher = stateReg;
 
-reg prev = 0;
-reg res = 0;
-
 addRoundKey encInitial(Message, keySchedule[0:127], firstEncrypt);
 encryptRound encR(stateReg, keySchedule[128*i +: 128], afterEncrypt);
 encryptLastRound encLR(stateReg, keySchedule[(128 * nr) +: 128], lastEncrypt);
 
-always @(posedge reset)
-    res = ~res;
-
 always @(posedge clk) 
 begin
-    if (prev != res)
-    begin
-    i <= 0;
-	prev <= res;
-    end
+    if (reset)
+        i <= 0;
     else if(i<1)begin
     i <= i + 1;
     stateReg<=firstEncrypt;

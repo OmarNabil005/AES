@@ -14,8 +14,6 @@ wire [0:127] afterEncrypt128, afterDecrypt128,
 
 reg [0:127] outReg = 128'h0;
 reg [0:4] i = 5'b00000;
-reg res = 0;
-reg prev = 0;
 
 keyExpansion #(4, 10) keyExp128(Key128, KeySchedule128);
 keyExpansion #(6, 12) keyExp192(Key192, KeySchedule192);
@@ -30,15 +28,11 @@ decrypt #(8, 14) dec256(clk, reset, afterEncrypt256, KeySchedule256, afterDecryp
 
 binaryToSevenSegment BCDconvert(outReg[120 +: 8], HEX2, HEX1, HEX0);
 
-always @(posedge reset)
-    res = ~res;
-
 always @(posedge clk)
 begin
-    if (prev != res)begin
+    if (reset)begin
         i <= 0;
         outReg <= 0;
-        prev <= res;
     end
     else if (SW == 2'b00)begin
         if (i <= 30)begin
