@@ -11,14 +11,14 @@ assign cipher = stateReg;
 reg prev = 0;
 reg res = 0;
 
-always @(reset)
+addRoundKey encInitial(Message, keySchedule[0:127], firstEncrypt);
+encryptRound encR(stateReg, keySchedule[128*i +: 128], afterEncrypt);
+encryptLastRound encLR(stateReg, keySchedule[(128 * nr) +: 128], lastEncrypt);
+
+always @(posedge reset)
     res = ~res;
 
-addRoundKey initialRound(Message, keySchedule[0:127], firstEncrypt);
-encryptRound er(stateReg, keySchedule[128*i +: 128], afterEncrypt);
-encryptLastRound elr(stateReg, keySchedule[(128 * nr) +: 128], lastEncrypt);
-
-always @(posedge clk) 
+always @(posedge clk or posedge reset) 
 begin
     if (prev != res)
     begin

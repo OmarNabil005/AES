@@ -11,14 +11,14 @@ assign decipher=stateReg;
 reg prev = 0;
 reg res = 0;
 
-always @(reset)
-    res = ~res;
-
-addRoundKey inv_initial (Message,keySchedule[(128 * nr) +:128], firstDecrypt);
+addRoundKey decInitial(Message,keySchedule[(128 * nr) +:128], firstDecrypt);
 decryptRound decR(stateReg, keySchedule[(128 * (2 * nr - i + 1)) +:128], afterDecrypt);
 decryptLastRound decLR(stateReg, keySchedule[0:127], lastDecrypt);
 
-always @(posedge clk) 
+always @(posedge reset)
+    res = ~res;
+
+always @(posedge clk or posedge reset) 
 begin
     if (prev != res)
     begin

@@ -13,10 +13,8 @@ wire [0:127] afterEncrypt128, afterDecrypt128,
              afterEncrypt256, afterDecrypt256;
 
 reg [0:127] outReg = 128'h0;
-integer nk = 4;
-integer nr = 10;
-reg res = 0;
 reg [0:4] i = 5'b00000;
+reg res = 0;
 reg prev = 0;
 
 keyExpansion #(4, 10) keyExp128(Key128, KeySchedule128);
@@ -30,66 +28,69 @@ decrypt #(6, 12) dec192(clk, reset, afterEncrypt192, KeySchedule192, afterDecryp
 encrypt #(8, 14) enc256(clk, reset, Message, KeySchedule256, afterEncrypt256);
 decrypt #(8, 14) dec256(clk, reset, afterEncrypt256, KeySchedule256, afterDecrypt256);
 
-binaryToSevenSegment BCDconvert(outReg, HEX2, HEX1, HEX0);
+binaryToSevenSegment BCDconvert(outReg[120 +: 8], HEX2, HEX1, HEX0);
 
-always @(reset)begin
+always @(posedge reset)
     res = ~res;
-    if (SW == 2'b01)
-    begin
-       nk = 4;
-       nr = 10; 
-    end
-    else if (SW == 2'b10)
-    begin
-       nk = 6;
-       nr = 12; 
-    end
-    else if (SW == 2'b11)
-    begin
-       nk = 8;
-       nr = 14; 
-    end
-end
 
-always @(posedge clk)
+always @(posedge clk or posedge reset)
 begin
     if (prev != res)begin
-    i <= 0;
-    outReg <= 0;
-    prev <= res;
+        i <= 0;
+        outReg <= 0;
+        prev <= res;
     end
-    else if (SW == 2'b00)
-    begin
-    outReg <= 0;
-    i <= 0;
+    else if (SW == 2'b00)begin
+        if (i <= 30)begin
+        outReg <= 0;
+        i <= i + 1;
+        end
+        else begin
+            outReg <= 0;
+        end
     end
     else if (i < 1)begin
         outReg <= Message;
         i <= i + 1;
     end
-    else if (i <= (nr + 1) && SW == 2'b01)begin
-        outReg <= afterEncrypt128;
-        i <= i + 1;
+    else if (SW == 2'b01)begin
+        if (i <= 11)begin
+            outReg <= afterEncrypt128;
+            i <= i + 1;
+        end
+        else if (i <= 22)begin
+            outReg <= afterDecrypt128;
+            i <= i + 1;
+        end
+        else begin
+            outReg <= afterDecrypt128;
+        end
     end
-    else if (i <= (2 * nr + 2) && SW == 2'b01)begin
-        outReg <= afterDecrypt128;
-        i <= i + 1;
+    else if (SW == 2'b10)begin
+        if (i <= 13)begin
+            outReg <= afterEncrypt192;
+            i <= i + 1;
+        end
+        else if (i <= 26)begin
+            outReg <= afterDecrypt192;
+            i <= i + 1;
+        end
+        else begin
+            outReg <= afterDecrypt192;
+        end
     end
-    else if (i <= (nr + 1) && SW == 2'b10)begin
-        outReg <= afterEncrypt192;
-        i <= i + 1;
-    end
-    else if (i <= (2 * nr + 2) && SW == 2'b10)begin
-        outReg <= afterDecrypt192;
-        i <= i + 1;
-    end
-    else if (i <= (nr + 1) && SW == 2'b11)begin
-        outReg <= afterEncrypt256;
-        i <= i + 1;
-    end
-    else if (i <= (2 * nr + 2) && SW == 2'b11)begin
-        outReg <= afterDecrypt256;
-        i <= i + 1;
+    else if (SW == 2'b11)begin
+        if(i <= 15)begin
+            outReg <= afterEncrypt256;
+            i <= i + 1;
+        end
+        else if (i <= 30)begin
+            outReg <= afterDecrypt256;
+            i <= i + 1;
+        end
+        else begin
+            outReg <= afterDecrypt256;
+        end
     end
 end
 
