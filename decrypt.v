@@ -18,7 +18,7 @@ decryptLastRound decLR(stateReg, keySchedule[0:127], lastDecrypt);
 always @(posedge reset)
     res = ~res;
 
-always @(posedge clk or posedge reset) 
+always @(posedge clk) 
 begin
     if (prev != res)
     begin

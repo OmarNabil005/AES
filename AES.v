@@ -33,7 +33,7 @@ binaryToSevenSegment BCDconvert(outReg[120 +: 8], HEX2, HEX1, HEX0);
 always @(posedge reset)
     res = ~res;
 
-always @(posedge clk or posedge reset)
+always @(posedge clk)
 begin
     if (prev != res)begin
         i <= 0;

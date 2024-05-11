@@ -18,7 +18,7 @@ encryptLastRound encLR(stateReg, keySchedule[(128 * nr) +: 128], lastEncrypt);
 always @(posedge reset)
     res = ~res;
 
-always @(posedge clk or posedge reset) 
+always @(posedge clk) 
 begin
     if (prev != res)
     begin
