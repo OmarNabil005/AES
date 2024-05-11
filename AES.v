@@ -1,4 +1,4 @@
-module AES (input clk, input reset, input [1:0] SW, output [6:0] HEX2, output [6:0] HEX1, output [6:0] HEX0);
+module AES (input clk, input reset, input [1:0] SW, output [6:0] HEX2, output [6:0] HEX1, output [6:0] HEX0, output reg led);
 
 wire [127:0] Message =128'h00112233445566778899aabbccddeeff; // Fixed message
 wire [0:127] Key128 = 128'h2b7e151628aed2a6abf7158809cf4f3c;
@@ -32,60 +32,60 @@ always @(posedge clk)
 begin
     if (reset)begin
         i <= 0;
-        outReg <= 0;
+        outReg = 0;
     end
     else if (SW == 2'b00)begin
         if (i <= 30)begin
-        outReg <= 0;
+        outReg = 0;
         i <= i + 1;
         end
-        else begin
-            outReg <= 0;
-        end
+        else 
+            outReg = 0;
     end
     else if (i < 1)begin
-        outReg <= Message;
+        outReg = Message;
         i <= i + 1;
     end
     else if (SW == 2'b01)begin
         if (i <= 11)begin
-            outReg <= afterEncrypt128;
+            outReg = afterEncrypt128;
             i <= i + 1;
         end
         else if (i <= 22)begin
-            outReg <= afterDecrypt128;
+            outReg = afterDecrypt128;
             i <= i + 1;
         end
-        else begin
-            outReg <= afterDecrypt128;
-        end
+        else
+            outReg = afterDecrypt128;
     end
     else if (SW == 2'b10)begin
         if (i <= 13)begin
-            outReg <= afterEncrypt192;
+            outReg = afterEncrypt192;
             i <= i + 1;
         end
         else if (i <= 26)begin
-            outReg <= afterDecrypt192;
+            outReg = afterDecrypt192;
             i <= i + 1;
         end
-        else begin
-            outReg <= afterDecrypt192;
-        end
+        else
+            outReg = afterDecrypt192;
     end
     else if (SW == 2'b11)begin
         if(i <= 15)begin
-            outReg <= afterEncrypt256;
+            outReg = afterEncrypt256;
             i <= i + 1;
         end
         else if (i <= 30)begin
-            outReg <= afterDecrypt256;
+            outReg = afterDecrypt256;
             i <= i + 1;
         end
-        else begin
-            outReg <= afterDecrypt256;
-        end
+        else 
+            outReg = afterDecrypt256;
     end
+    if (i >= 20 && outReg == Message)
+        led = 1'b1;
+    else
+        led = 1'b0;
 end
 
 endmodule
