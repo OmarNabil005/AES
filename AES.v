@@ -1,9 +1,9 @@
 module AES (input clk, input reset, input [1:0] SW, output [6:0] HEX2, output [6:0] HEX1, output [6:0] HEX0, output reg led);
 
-wire [127:0] Message =128'h00112233445566778899aabbccddeeff; // Fixed message
-wire [0:127] Key128 = 128'h2b7e151628aed2a6abf7158809cf4f3c;
+wire [127:0] Message =128'h00112233445566778899aabbccddeeff;                                    // Fixed message
+wire [0:127] Key128 = 128'h2b7e151628aed2a6abf7158809cf4f3c;                                    // Fixed keys  
 wire [0:191] Key192 = 192'h8e73b0f7da0e6452c810f32b809079e562f8ead2522c6b7b;
-wire [0:255] Key256 = 256'h000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f; // Fixed key
+wire [0:255] Key256 = 256'h000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f; 
 
 wire [0:1407] KeySchedule128;
 wire [0:1663] KeySchedule192;
@@ -34,7 +34,7 @@ begin
         i <= 0;
         outReg = 0;
     end
-    else if (SW == 2'b00)begin
+    else if (SW == 2'b00)begin          // 00 -> out = 0 (unused case)
         if (i <= 30)begin
         outReg = 0;
         i <= i + 1;
@@ -46,7 +46,7 @@ begin
         outReg = Message;
         i <= i + 1;
     end
-    else if (SW == 2'b01)begin
+    else if (SW == 2'b01)begin          // 01 -> 128 bits mode
         if (i <= 11)begin
             outReg = afterEncrypt128;
             i <= i + 1;
@@ -58,7 +58,7 @@ begin
         else
             outReg = afterDecrypt128;
     end
-    else if (SW == 2'b10)begin
+    else if (SW == 2'b10)begin          // 02 -> 192 bits mode
         if (i <= 13)begin
             outReg = afterEncrypt192;
             i <= i + 1;
@@ -70,7 +70,7 @@ begin
         else
             outReg = afterDecrypt192;
     end
-    else if (SW == 2'b11)begin
+    else if (SW == 2'b11)begin          // 03 -> 256 bits mode
         if(i <= 15)begin
             outReg = afterEncrypt256;
             i <= i + 1;
@@ -82,7 +82,7 @@ begin
         else 
             outReg = afterDecrypt256;
     end
-    if (i >= 20 && outReg == Message)
+    if (i >= 20 && outReg == Message)   // turn led on when finished
         led = 1'b1;
     else
         led = 1'b0;
@@ -91,7 +91,7 @@ end
 endmodule
 
 
-module testbench1();
+module testbench1();        // set switches and reset manually when testbenching
 
 // Signals
 wire [6:0] HEx2;
