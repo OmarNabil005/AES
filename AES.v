@@ -1,8 +1,8 @@
 module AES (input clk, input reset, input [1:0] SW, output [6:0] HEX2, output [6:0] HEX1, output [6:0] HEX0, output reg led);
 
 wire [127:0] Message =128'h00112233445566778899aabbccddeeff;                                    // Fixed message
-wire [0:127] Key128 = 128'h2b7e151628aed2a6abf7158809cf4f3c;                                    // Fixed keys  
-wire [0:191] Key192 = 192'h8e73b0f7da0e6452c810f32b809079e562f8ead2522c6b7b;
+wire [0:127] Key128 = 128'h000102030405060708090a0b0c0d0e0f;                                    // Fixed keys  
+wire [0:191] Key192 = 192'h000102030405060708090a0b0c0d0e0f1011121314151617;
 wire [0:255] Key256 = 256'h000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f; 
 
 wire [0:1407] KeySchedule128;
