@@ -1,4 +1,4 @@
-module AES (input clk, input reset, input [1:0] SW, output [6:0] HEX2, output [6:0] HEX1, output [6:0] HEX0, output reg led);
+module AES (input clk, input reset, input [1:0] SW, output [6:0] HEX5, output [6:0] HEX4, output [6:0] HEX3, output [6:0] HEX2, output [6:0] HEX1, output [6:0] HEX0, output reg led);
 
 wire [127:0] Message =128'h00112233445566778899aabbccddeeff;                                    // Fixed message
 wire [0:127] Key128 = 128'h000102030405060708090a0b0c0d0e0f;                                    // Fixed keys  
@@ -27,6 +27,10 @@ encrypt #(8, 14) enc256(clk, reset, Message, KeySchedule256, afterEncrypt256);
 decrypt #(8, 14) dec256(clk, reset, afterEncrypt256, KeySchedule256, afterDecrypt256);
 
 binaryToSevenSegment BCDconvert(outReg[120 +: 8], HEX2, HEX1, HEX0);
+
+assign HEX5 = 7'b0001000;               // show "AES" on display
+assign HEX4 = 7'b0000110;
+assign HEX3 = 7'b0010010;
 
 always @(posedge clk)
 begin
